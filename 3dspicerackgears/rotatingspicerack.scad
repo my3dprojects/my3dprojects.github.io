@@ -4,10 +4,10 @@ $fn = 60;
 
 // --- 1. CONFIGURATION ---
 
-// 0 = ASSEMBLY VIEW 
+// 0 = ASSEMBLY VIEW
 // 1 = BOX (With 3rd Pin for Idler)
 // 2 = GEARS (Set to 2 to print your new gears)
-// 3 = HANDLE (Strict Lozenge)
+// 3 = HANDLE (Strict Lozenge with O-Ring Clearance Cut)
 PART_TO_PRINT = 2; 
 
 // --- TRACTION SETTINGS ---
@@ -57,9 +57,9 @@ dist_final = r_main_final + r_idler_final + 0.5;
 final_idler_x = sqrt(pow(dist_final, 2) - pow(y_offset, 2));
 
 
-// --- 4. Z HEIGHTS ---
-gear_h = 8;          
-spacer_h = 0.5;      
+// --- 4. Z HEIGHTS (REVERTED TO ORIGINAL) ---
+gear_h = 8;           
+spacer_h = 0.5;       
 total_stack_h = spacer_h + gear_h; 
 pin_top_z = floor_thick + total_stack_h + 0.5;
 
@@ -69,8 +69,8 @@ pin_top_z = floor_thick + total_stack_h + 0.5;
 if (PART_TO_PRINT == 0) {
     // ASSEMBLY VIEW
     render_box();
-    translate([0, FIXED_PIN_Y_FRONT, floor_thick]) gear_unit(teeth_main, r_main_final, "Silver");
-    translate([0, FIXED_PIN_Y_BACK, floor_thick])  gear_unit(teeth_main, r_main_final, "Silver");
+    translate([0, FIXED_PIN_Y_FRONT, floor_thick]) gear_unit(teeth_main, r_main_final, "Silver", show_oring=true);
+    translate([0, FIXED_PIN_Y_BACK, floor_thick])  gear_unit(teeth_main, r_main_final, "Silver", show_oring=true);
     translate([final_idler_x, 0, floor_thick]) gear_unit(teeth_idler, r_idler_final, "Gold");
     translate([0, 0, pin_top_z]) render_handle(printing=false);
 } 
@@ -85,7 +85,7 @@ else if (PART_TO_PRINT == 2) {
     translate([0, r_main_final + r_idler_final + 5, 0]) gear_unit(teeth_idler, r_idler_final, "Gold");
 } 
 else if (PART_TO_PRINT == 3) {
-    // PRINT: HANDLE (Forced Lozenge)
+    // PRINT: HANDLE (Forced Lozenge with Relief Cut)
     render_handle(printing=true);
 }
 
@@ -97,29 +97,43 @@ module render_handle(printing) {
     rot_vec = printing ? [180, 0, 0] : [0, 0, 0];
     pos_vec = printing ? [0, 0, handle_h] : [0, 0, 0];
     
-    // Pin connector is r=2.4. We leave 4.0mm to ensure decent wall thickness.
-    // Original handle r=6.0, so this removes ~2mm from each end.
+    // Lozenge Cut Params
     shave_offset = 2.0; 
     cut_len = (FIXED_PIN_Y_BACK - FIXED_PIN_Y_FRONT) + (shave_offset * 2);
     cut_center_y = (FIXED_PIN_Y_BACK + FIXED_PIN_Y_FRONT) / 2;
+
+    // Relief Cut Params (For O-Ring)
+    cut_depth = 3.0;
+    // Length of the handle between pin centers
+    center_dist = FIXED_PIN_Y_BACK - FIXED_PIN_Y_FRONT;
+    // We leave 5.0mm of material around each pin center
+    safety_margin = 5.0; 
+    relief_cut_len = center_dist - (safety_margin * 2);
 
     translate(pos_vec)
     rotate(rot_vec)
     color("Crimson")
     union() {
-        intersection() {
-            // ORIGINAL HULL (Capsule Shape)
-            hull() {
-                translate([0, FIXED_PIN_Y_FRONT, 0]) cylinder(r=6, h=handle_h); 
-                translate([0, FIXED_PIN_Y_BACK, 0]) cylinder(r=6, h=handle_h);
+        difference() {
+            intersection() {
+                // ORIGINAL HULL (Capsule Shape)
+                hull() {
+                    translate([0, FIXED_PIN_Y_FRONT, 0]) cylinder(r=6, h=handle_h); 
+                    translate([0, FIXED_PIN_Y_BACK, 0]) cylinder(r=6, h=handle_h);
+                }
+                
+                // SHAVING CUBE (Forces Flat Ends)
+                translate([0, cut_center_y, handle_h/2])
+                    cube([20, cut_len, handle_h + 10], center=true);
             }
-            
-            // SHAVING CUBE (Forces Flat Ends)
-            translate([0, cut_center_y, handle_h/2])
-                cube([20, cut_len, handle_h + 10], center=true);
+
+            // --- THE RELIEF CUT ---
+            // Removes bottom 3.0mm, but stops 5.0mm short of the pins
+            translate([0, cut_center_y, cut_depth/2]) 
+                cube([20, relief_cut_len, cut_depth], center=true);
         }
         
-        // Connectors for Main Pins
+        // Connectors for Main Pins (Original Length/Pos)
         translate([0, FIXED_PIN_Y_FRONT, -5]) cylinder(r=2.4, h=5.1); 
         translate([0, FIXED_PIN_Y_BACK, -5]) cylinder(r=2.4, h=5.1);
     }
@@ -143,7 +157,7 @@ module base_enclosure(w, l, h) {
                 cube([cutout_r*2 + 6, 20, gear_h + 20], center=true);
                 
             translate([0, -l/2, h])
-                 cube([cutout_r*1.6, 20, 20], center=true);
+                  cube([cutout_r*1.6, 20, 20], center=true);
         }
         
         pin_y_front = FIXED_PIN_Y_FRONT - final_box_center_y;
@@ -196,7 +210,7 @@ module pin() {
     }
 }
 
-module gear_unit(teeth, radius, col) {
+module gear_unit(teeth, radius, col, show_oring=false) {
     clearance = 0.6; 
     
     // Traction Parameters
@@ -239,6 +253,28 @@ module gear_unit(teeth, radius, col) {
                     }
             }
         }
+    }
+    
+    // 5. VISUAL O-RING (Only shows if show_oring is true)
+    if (show_oring && TRACTION_MODE == 1) {
+        // O-Ring Calculation based on user specs (1.75" ID, 2.0" OD)
+        // Thickness = (2.0 - 1.75)/2 = 0.125 inch = 3.175mm
+        oring_thick = 3.175;
+        
+        // We use the groove_r_center (24mm) for the visual radius
+        // because the O-ring is stretched onto the gear.
+        groove_r_center = 24; 
+        groove_d = 2.0;
+
+        // Position: Bottom of groove is at (spacer_h + gear_h - groove_d)
+        // Center of O-ring is half its thickness up from that bottom.
+        z_pos = spacer_h + gear_h - groove_d + (oring_thick/2);
+
+        color("Black")
+        translate([0, 0, z_pos])
+        rotate_extrude($fn=60)
+        translate([groove_r_center, 0, 0])
+        circle(r=oring_thick/2, $fn=20);
     }
 }
 
