@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Spice Rack Build Guide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --highlight: #3498db;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin-top: 40px;
+            font-size: 1.2rem;
+            display: inline-block;
+        }
+
+        h3 {
+            color: var(--accent);
+            margin-top: 25px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        .alert-box {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #856404;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .card h4 {
+            margin-top: 0;
+            color: var(--highlight);
+            font-size: 1.1rem;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            background: var(--highlight);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--highlight);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        @media print {
+            body { padding: 0; background: white; }
+            .container { box-shadow: none; padding: 0; margin: 0; width: 100%; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Ultimate Spice Rack Build Guide</h1>
+    <p style="text-align: center; font-style: italic; color: #666;">A precision guide for printing and assembly.</p>
+
+    <!-- SECTION 1 -->
+    <h2>1. Bill of Materials</h2>
+    <div class="alert-box">
+        <strong>Hardware Checklist:</strong> Ensure you have these items before printing.
+    </div>
+    <ul>
+        <li><strong>O-Rings:</strong> #224 Buna-N O-Ring (70A Durometer). <br><small>Spec: 1-3/4" ID, 2" OD, 1/8" Width. Quantity: 2.</small></li>
+        <li><strong>Lubricant:</strong> Lucas Oil White Lithium Grease (Tube Only).</li>
+    </ul>
+    <div class="alert-box" style="background-color: #f8d7da; border-color: #dc3545; color: #721c24;">
+        <strong>WARNING:</strong> Do not use aerosol/spray grease; the propellants can crack 3D printed plastic.
+    </div>
+
+    <!-- SECTION 2 -->
+    <h2>2. Printing Guide (3 Plates)</h2>
+    <div class="grid-3">
+        <!-- PLATE A -->
+        <div class="card">
+            <h4>Plate A: The Base</h4>
+            <p><strong>Config:</strong> <code>PART_TO_PRINT = 1;</code></p>
+            <ul>
+                <li><strong>Material:</strong> PLA or PETG</li>
+                <li><strong>Walls:</strong> 3 Walls (Essential)</li>
+                <li><strong>Infill:</strong> 15% - 20%</li>
+                <li><strong>Adhesion:</strong> 5mm Brim (Critical)</li>
+            </ul>
+            <small><em>Tip: Let cool completely before removing.</em></small>
+        </div>
+
+        <!-- PLATE B -->
+        <div class="card">
+            <h4>Plate B: The Gears</h4>
+            <p><strong>Config:</strong> <code>PART_TO_PRINT = 2;</code></p>
+            <ul>
+                <li><strong>Config:</strong> <code>TRACTION_MODE = 1;</code></li>
+                <li><strong>Walls:</strong> 3 Walls</li>
+                <li><strong>Infill:</strong> 20%</li>
+                <li><strong>Adhesion:</strong> Skirt</li>
+            </ul>
+            <small><em>Includes 2 Main Gears + 1 Idler.</em></small>
+        </div>
+
+        <!-- PLATE C -->
+        <div class="card">
+            <h4>Plate C: The Handle</h4>
+            <p><strong>Config:</strong> <code>PART_TO_PRINT = 3;</code></p>
+            <ul>
+                <li><strong>Orientation:</strong> Flat face down</li>
+                <li><strong>Adhesion:</strong> Brim (Highly Recommended)</li>
+                <li><strong>Supports:</strong> None</li>
+            </ul>
+            <small><em>The new "Lozenge" shape.</em></small>
+        </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <h2>3. Assembly Instructions</h2>
+
+    <div class="step-row">
+        <span class="step-number">1</span>
+        <div>
+            <h3>Prep the Gears</h3>
+            <ul>
+                <li>Inspect groove on large gears; scrape out strings/blobs.</li>
+                <li>Stretch one <strong>#224 O-ring</strong> into each groove.</li>
+                <li><strong>Roll Test:</strong> Rubber should touch table, not plastic.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step-row">
+        <span class="step-number">2</span>
+        <div>
+            <h3>Prep the Base</h3>
+            <ul>
+                <li>Sand the 3 vertical pins smooth.</li>
+                <li>Apply a tiny smear of <strong>Lucas Oil White Lithium Grease</strong>.</li>
+                <li><em>Tip: A little goes a long way. Do not over-grease.</em></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step-row">
+        <span class="step-number">3</span>
+        <div>
+            <h3>Final Assembly</h3>
+            <ul>
+                <li>Place <strong>Small Idler Gear</strong> (Gold) on center pin.</li>
+                <li>Place <strong>Two Large Gears</strong> on main pins.</li>
+                <li>Attach <strong>Handle</strong>: Align holes and press firmly onto main pins.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step-row">
+        <span class="step-number">4</span>
+        <div>
+            <h3>The Spice Test</h3>
+            <ul>
+                <li>Place spice bottle on one gear (resting on rubber).</li>
+                <li>Turn handle. Grip should grab bottle and rotate smoothly.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
