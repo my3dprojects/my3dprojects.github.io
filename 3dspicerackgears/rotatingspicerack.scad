@@ -1,4 +1,5 @@
 // --- FINAL SPICE RACK: FORCED LOZENGE HANDLE & O-RING GEARS ---
+// UPDATE: IDLER PIN AND GEAR HEIGHT MADE FLUSH WITH FILLER SHAPE
 
 $fn = 60; 
 
@@ -57,11 +58,14 @@ dist_final = r_main_final + r_idler_final + 0.5;
 final_idler_x = sqrt(pow(dist_final, 2) - pow(y_offset, 2));
 
 
-// --- 4. Z HEIGHTS (REVERTED TO ORIGINAL) ---
-gear_h = 8;           
-spacer_h = 0.5;       
+// --- 4. Z HEIGHTS (ADJUSTED) ---
+gear_h = 8;            
+spacer_h = 0.5;        
 total_stack_h = spacer_h + gear_h; 
-pin_top_z = floor_thick + total_stack_h + 0.5;
+
+// *** FIX APPLIED HERE ***
+// Removed the extra "+ 0.5" so the pin is exactly the height of the filler/gears
+pin_top_z = floor_thick + total_stack_h; 
 
 
 // --- 5. RENDER LOGIC ---
