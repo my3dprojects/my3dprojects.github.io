@@ -16,7 +16,7 @@ num_bottles = 8;
 // "base"   -> The red track housing
 // "chain"  -> The loop of links (Prints flat on bed)
 // "handle" -> The central spinner
-part_to_print = "handle";
+part_to_print = "assembly";
 
 /* [Dimensions] */
 rail_height = 16;            
@@ -27,8 +27,8 @@ handle_thickness = 15;
 sliding_clearance = 1.5;
 
 /* [Animation Controls] */
-show_bottles = false;
-freeze_for_print = true;     
+show_bottles = true;
+freeze_for_print = false;     
 print_phase = 0;             
 
 /* [Tuning - Pintle Hitch] */

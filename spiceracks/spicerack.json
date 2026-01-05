@@ -1,0 +1,30 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "New set 1": {
+            "arm_width": "8",
+            "bottle_diameter": "53",
+            "bottles_on_curve": "3",
+            "coupon_gap": "6",
+            "ef_relief_h": "0.59999999999999998",
+            "floor_thickness": "3",
+            "freeze_for_print": "false",
+            "handle_height": "90",
+            "handle_thickness": "15",
+            "hinge_clear": "0.59999999999999998",
+            "hinge_head_d": "8.5999999999999996",
+            "hinge_lug_d": "9",
+            "hinge_shank_d": "5",
+            "jaw_thickness": "2.7999999999999998",
+            "num_bottles": "8",
+            "part_to_print": "assembly",
+            "print_phase": "1",
+            "rail_height": "16",
+            "ring_wall_thick": "1.2",
+            "show_bottles": "true",
+            "sliding_clearance": "1.5",
+            "wall_height": "20",
+            "z_gap": "0.34999999999999998"
+        }
+    }
+}
