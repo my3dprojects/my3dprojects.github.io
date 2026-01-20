@@ -1,6 +1,10 @@
-// --- Projector Tilt Riser (FINAL FIX) ---
+// --- Projector Tilt Riser (FINAL ALIGNMENT + ASSEMBLY FLIP) ---
 
 /* [Export Selection] */
+// 0 = Assembly View (Flipped Top, Screw on Top)
+// 1 = Top Plate (Printable)
+// 2 = Bottom Plate (Printable)
+// 3 = Hardware (Pins & Screw)
 print_selection = 1; 
 
 /* [Dimensions] */
@@ -22,6 +26,8 @@ tab_radius = 28;
 hinge_pin_dia = 10; 
 hinge_radius = 8;
 hinge_clearance = 0.6; 
+// Pushes the hinge back from the plate edge to prevent binding
+hinge_offset = 4; 
 
 /* [Hidden] */
 $fn = 60; 
@@ -33,20 +39,40 @@ if (print_selection == 0) {
     color("Teal") bottom_plate(); 
     
     // --- ASSEMBLY LOGIC ---
-    // With both hinges now having identical "flat bottoms" (D-shape),
-    // this rotation will result in perfect visual alignment.
-    translate([0, d, plate_thickness]) 
-        rotate([-10, 0, 0]) 
-        translate([0, -d, -plate_thickness]) 
+    // Pivot Point Location:
+    // Y = d + hinge_offset (Center of hinge pin)
+    // Z = plate_thickness * 2 (12mm - Aligned with raised bottom hinge)
+    
+    translate([0, d + hinge_offset, plate_thickness * 2]) 
+        rotate([-10, 0, 0]) // Tilt angle (adjust as needed)
+        translate([0, -(d + hinge_offset), -(plate_thickness * 2)]) 
         union() {
-            color("CornflowerBlue") top_plate(); 
-            translate([w/2, -tab_extension, plate_thickness + 50]) 
+            // --- TOP PLATE (FLIPPED) ---
+            // 1. We rotate [0, 180, 0] to flip it upside down (Ridge Down) while keeping Y orientation.
+            // 2. We translate X by 'w' to compensate for the flip.
+            // 3. We translate Z by 'plate_thickness * 3' (18mm) to align the flipped hinge (z=-6) to the target (z=12).
+            translate([w, 0, plate_thickness * 3]) 
+                rotate([0, 180, 0]) 
+                color("CornflowerBlue") top_plate(); 
+            
+            // --- SCREW (ON TOP) ---
+            // 1. Rotate 180 X to point shaft down.
+            // 2. Translate to align with the tab hole.
+            //    Z = 22mm (12mm Plate Height + 10mm Screw Head Thickness compensation)
+            translate([w/2, -tab_extension, plate_thickness * 2 + 10]) 
                 rotate([180, 0, 0]) 
                 color("Orange") printable_screw(); 
         }
         
-    translate([-2, d, plate_thickness]) rotate([0,90,0]) color("Orange") hinge_pin_printable();
-    translate([w+2, d, plate_thickness]) rotate([0,-90,0]) color("Orange") hinge_pin_printable();
+    // --- PINS ---
+    // Aligned to the new Hinge Axis
+    translate([-2, d + hinge_offset, plate_thickness * 2]) 
+        rotate([0,90,0]) 
+        color("Orange") hinge_pin_printable();
+        
+    translate([w+2, d + hinge_offset, plate_thickness * 2]) 
+        rotate([0,-90,0]) 
+        color("Orange") hinge_pin_printable();
 
 } else if (print_selection == 1) {
     top_plate();
@@ -81,6 +107,12 @@ module top_plate() {
             difference() {
                 cube([w, d, plate_thickness]);
                 grid_cutouts();
+                
+                // --- TRIMMED BACK EDGES ---
+                translate([-1, d - 5, -1])
+                    cube([(w/3) + 1, 10, plate_thickness + 2]);
+                translate([w - (w/3), d - 5, -1])
+                    cube([(w/3) + 1, 10, plate_thickness + 2]);
             }
             
             // --- FIXED RIDGE ---
@@ -101,30 +133,34 @@ module top_plate() {
             translate([0, d, 0]) {
                 knuckle_len = w/3 - hinge_clearance;
                 
-                translate([w/3 + hinge_clearance/2, 0, plate_thickness]) 
+                // Cylinder moved back by hinge_offset
+                translate([w/3 + hinge_clearance/2, hinge_offset, plate_thickness]) 
                     rotate([0,90,0]) 
-                    difference() {
-                        cylinder(h=knuckle_len, r=hinge_radius);
-                        translate([0,0,-1]) cylinder(h=w, d=hinge_pin_dia + 0.6);
-                    }
-                    
+                    cylinder(h=knuckle_len, r=hinge_radius);
+
+                // Support Block 
                 translate([w/3 + hinge_clearance/2, -hinge_radius, 0]) 
                     cube([knuckle_len, hinge_radius, plate_thickness]);
             }
         }
 
-        // --- FLUSH CUT (TOP) ---
-        // Stops the cut 20mm before the back to preserve hinge height
-        translate([-50, 10, plate_thickness]) cube([1000, d - 20, 50]);
+        // --- GLOBAL HOLE CUT ---
+        translate([-50, d + hinge_offset, plate_thickness]) 
+            rotate([0,90,0]) 
+            cylinder(h=w+100, d=hinge_pin_dia + 0.6);
 
-        // --- FLOOR CUT (BOTTOM) ---
-        // Cuts off the hinge "belly" that protrudes below Z=0
-        // This ensures the bottom of the hinge is flush with the bottom of the plate.
+        // Flush Cut (Top Back)
+        translate([-50, d + hinge_offset + 10, plate_thickness]) cube([1000, 50, 50]);
+
+        // Floor Cut (D-Shape Profile)
         translate([-50, -50, -50]) cube([2000, 2000, 50]);
     }
 }
 
 module bottom_plate() {
+    // Hinge Axis is at 12mm absolute Z
+    hinge_z = plate_thickness * 2; 
+
     difference() {
         union() {
             difference() {
@@ -139,22 +175,42 @@ module bottom_plate() {
                 translate([0, -tab_extension, plate_thickness - 2.0]) 
                     cylinder(h=2.1, d=screw_dia + 4); 
             }
+            
+            // Hinge Structure
             translate([0, d, 0]) {
                  knuckle_len = w/3 - hinge_clearance;
-                 translate([0, 0, plate_thickness]) rotate([0,90,0]) difference() {
-                        cylinder(h=knuckle_len, r=hinge_radius);
-                        translate([0,0,-1]) cylinder(h=w, d=hinge_pin_dia + 0.6);
-                    }
-                 translate([w - knuckle_len, 0, plate_thickness]) rotate([0,90,0]) difference() {
-                        cylinder(h=knuckle_len, r=hinge_radius);
-                        translate([0,0,-1]) cylinder(h=w, d=hinge_pin_dia + 0.6);
-                    }
-                 translate([0, -hinge_radius, 0]) cube([knuckle_len, hinge_radius, plate_thickness]);
-                 translate([w-knuckle_len, -hinge_radius, 0]) cube([knuckle_len, hinge_radius, plate_thickness]);
+                 
+                 // Cylinder 1 (Raised & Offset)
+                 translate([0, hinge_offset, hinge_z]) 
+                    rotate([0,90,0]) 
+                    cylinder(h=knuckle_len, r=hinge_radius);
+
+                 // Cylinder 2 (Raised & Offset)
+                 translate([w - knuckle_len, hinge_offset, hinge_z]) 
+                    rotate([0,90,0]) 
+                    cylinder(h=knuckle_len, r=hinge_radius);
+
+                 // Support 1 (Extended)
+                 translate([0, -hinge_radius, 0]) 
+                    cube([knuckle_len, hinge_radius + hinge_offset, hinge_z]);
+                 
+                 // Support 2 (Extended)
+                 translate([w-knuckle_len, -hinge_radius, 0]) 
+                    cube([knuckle_len, hinge_radius + hinge_offset, hinge_z]);
             }
         }
-        // Bottom Plate Floor Cut
+        
+        // --- GLOBAL HOLE CUT ---
+        translate([-50, d + hinge_offset, hinge_z]) 
+            rotate([0,90,0]) 
+            cylinder(h=w+100, d=hinge_pin_dia + 0.6);
+
+        // Floor Cut (Standard)
         translate([-50, -50, -50]) cube([1000, 1000, 50]);
+
+        // --- MATCHING PROFILE CUT ---
+        translate([-50, d + hinge_offset - hinge_radius, 0])
+            cube([w+100, hinge_radius*2, hinge_z - plate_thickness]);
     }
 }
 
